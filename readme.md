@@ -3,6 +3,46 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Made With](https://img.shields.io/badge/Made%20with-Python-blue)
 
+⚙️ Installation
+
+1. Clone the repository
+- git clone https://github.com/Brandonp584/Python-Port-Scanner.git
+- cd YOUR_REPO_NAME
+
+2. Ensure Python is installed
+This Project requires:
+- Python 3.x
+
+Check your version:
+- python --version
+
+🚀 Quick Start
+Run the scanner with default settings:
+- python scanner.py
+
+Or run a custom scan:
+- python scanner.py --target 127.0.0.1 --start 1 --end 1000
+
+✨ Features
+
+- ⚡ Fast Multi-threaded Scanning
+    Scan thousands of ports quickly using ThreadPoolExecutor
+
+- 🔍 Smart Service Detection
+    Identifies common services like HTTP, SSH, FTP, SMB, and more
+
+-  🛰️ Banner Grabbing
+    Attempts to detect running services by analyzing responses
+
+-  🎯 Custom Port Scanning (CLI)
+    Easily define target IP and port ranges from command line
+
+-  🖥️ Clean Output
+    Displays only ports with readable service information
+
+-  🔒 Safe by Design
+    Defaults to localhost (127.0.0.1) for secure testing
+
 📌 Overview
 
 This is a Python-based port scanner that identifies open ports on your local machine (127.0.0.1).
@@ -10,12 +50,31 @@ This is a Python-based port scanner that identifies open ports on your local mac
 It includes:
 
 ⚡ Multi-threaded scanning for speed
-
 🔍 Basic service detection (smart port mapping)
-
 🛰️ Banner grabbing for identifying services
 
 Built for learning, experimentation, and safe local testing.
+
+⚡ Command-Line Interface (CLI)
+
+You can now run scans without modifying the code.
+
+🧪 Usage
+python scanner.py --target 127.0.0.1 --start 1 --end 1000
+🧩 Options
+
+--target → Target IP (default: 127.0.0.1)
+
+--start → Start port (default: 1)
+
+--end → End port (default: 6000)
+
+📌 Examples
+# Default scan
+python scanner.py
+
+# Custom port range
+python scanner.py --target 127.0.0.1 --start 20 --end 100
 
 🧠 How It Works
 1. Importing Modules
@@ -213,8 +272,8 @@ Systems without permission
 
 - Multi-threading (Implemented)
 - ThreadPoolExecutor (Better performance) - Implemented
-- Banner grabbing (idenify services) - Implemented
-- Command-line arguments
+- Banner grabbing (identify services) - Implemented
+- Command-line arguments - Implemented
 - Scanning different IP addresses
 - Service detection (HTTP, FTP, etc.)
 
