@@ -16,9 +16,6 @@ def port_scan(target, port):
         # 4. Check the result
         if result == 0:
             print(f"[OPEN] Port {port}")
-
-        else:
-            print(f"[CLOSED] Port {port}")
         
         # 5. Close the connection
         s.close()
