@@ -1,6 +1,6 @@
 🔎 Python Port Scanner (Localhost)
 
-This is a simple Python-based port scanner that checks which ports are open on your own machine (127.0.0.1). It is designed for leraning purposes and safe testing.
+This is a simple Python-based port scanner that checks which ports are open on your own machine (127.0.0.1). It is designed for learning purposes and safe testing.
 
 🧠 How It Works
 
@@ -17,33 +17,32 @@ This is a simple Python-based port scanner that checks which ports are open on y
 - This ensures all scans stay on your machine.
 
 3. Creating the function
-    "def port_scan(target, port):"
+    "def port_scan(port):"
 
 - This function checks a single port.
-- It takes:
-    - target (IP address)
+- It takes
     - port (port number)
 
-4. Using try/expect (error handling)
+4. Using try/except (error handling)
     "try"
 
 - Prevents the program from crashing if something goes wrong.
 
-    "expect socket.error as e:"
+    "except Exception as e:"
 
 - Catches network-related errors.
 - Prints the error instead of stopping the program.
 
 5. Creating a socket 
-    "s= socket.socket(socket.AF_inet, socket.SOCK_STREAM)"
+    "s= socket.socket(socket.AF_INET, socket.SOCK_STREAM)"
 
 - AF_INET → IPv4
 - SOCK_STREAM → TCP Connection
 
 6. Setting a timeout
-    "s.settimeout(2)"
+    "s.settimeout(1)"
 
-- Waits up to 2 seconds per port.
+- Waits up to 1 seconds per port.
 - Prevents the scan from hanging too long.
 
 7. Connecting to the port
@@ -65,15 +64,56 @@ This is a simple Python-based port scanner that checks which ports are open on y
 
 - Always close connections to free resources.
 
-10. Scanning multiple ports
-    "for port in range(1, 1025):"
+10. Scanning multiple ports with threading
+    "for port in range(1, 6000):"
 
-- Loops through ports 1-1024
-- These are known as well-known ports
+- Scans ports 1-6000
+
+    "Thread(target=port_scan, args=(port,))
+
+- Uses threading for faster scanning
+- Multiple ports are scanned at the same time
+
+📊 Output Behavor
+
+- Only open ports are displayed
+- Progress updates appear during scanning
+- A final message confirms completion
+
+Example Output
+
+Starting scan...
+[OPEN] Port 135
+[OPEN] Port 445
+[OPEN] Port 5501
+Scan complete.
+
+🔒 Safety Notice
+
+This tool is intened for:
+
+- Localhost (127.0.0.1)
+- Personal learning environments
+
+⚠️ DO NOT SCAN:
+
+- External servers
+- Networks you dont own
+- Systems without permission
 
 🚀 Future Improvements
 
-- Multi-threading (faster scans)
+- Multi-threading (Implemented)
+- ThreadPoolExecutor (Better performance)
 - Banner grabbing (idenify services)
 - Command-line arguments
-- Scanning different IPs
+- Scanning different IP addresses
+- Service detection (HTTP, FTP, etc.)
+
+📌 Author Notes
+
+This project was built as part of learning:
+
+- Networking fundamentals
+- Python socket programming
+- Basic cybersecurity concepts
