@@ -3,6 +3,20 @@ from concurrent.futures import ThreadPoolExecutor
 
 target = "127.0.0.1"
 
+def grab_banner(s):
+    try:
+        s.send(b"HEAD / HTTP/1.0\r\n\r\n")
+        banner = s.recv(1024).decode().lower()
+
+        if "http" in banner:
+            return "HTTP"
+        elif "server" in banner:
+            return "Web Server"
+        else:
+            return banner.strip()
+    except:
+        return "Unknown"
+
 def port_scan( port):
     try:
         # 1. Create a socket object
@@ -16,7 +30,8 @@ def port_scan( port):
 
         # 4. Check the result
         if result == 0:
-            print(f"[OPEN] Port {port}")
+            service = grab_banner(s)
+            print(f"[OPEN] Port {port} ({service})")
         
         # 5. Close the connection
         s.close()
