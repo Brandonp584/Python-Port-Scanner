@@ -9,7 +9,7 @@ def port_scan( port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # 2. Set a timeout for the connection attempt
-        s.settimeout(2)
+        s.settimeout(1)
 
         # 3. Attempt to connect
         result = s.connect_ex((target, port))
@@ -25,8 +25,16 @@ def port_scan( port):
         print(f"An error occurred while scanning port {port}: {e}")
 
 threads = []
+
+print("Starting scan...")
+
 # Scan ports from 1 to 6000
 for port in range(1, 6000):
+
+    # Progress update (every 1000 ports)
+    if port % 1000 == 0:
+        print(f"Scanned up to port {port}...")
+
     t = Thread(target=port_scan, args=(port,))
     t.start()
     threads.append(t)
@@ -35,4 +43,4 @@ for port in range(1, 6000):
 for t in threads:
     t.join()
 
-print(f"Scanning port {port}")
+print(f"Scan Complete.")
