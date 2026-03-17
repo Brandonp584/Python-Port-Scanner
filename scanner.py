@@ -1,8 +1,9 @@
 import socket 
+from threading import Thread
 
 target = "127.0.0.1"
 
-def port_scan(target, port):
+def port_scan( port):
     try:
         # 1. Create a socket object
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,6 +24,15 @@ def port_scan(target, port):
     except Exception as e:
         print(f"An error occurred while scanning port {port}: {e}")
 
-# Scan ports 1-1024
-for port in range(1, 1025):
-    port_scan(target, port)
+threads = []
+# Scan ports from 1 to 6000
+for port in range(1, 6000):
+    t = Thread(target=port_scan, args=(port,))
+    t.start()
+    threads.append(t)
+
+# Wait for all threads to finish
+for t in threads:
+    t.join()
+
+print(f"Scanning port {port}")
