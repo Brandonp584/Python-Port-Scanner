@@ -3,112 +3,217 @@
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Made With](https://img.shields.io/badge/Made%20with-Python-blue)
 
-This is a simple Python-based port scanner that checks which ports are open on your own machine (127.0.0.1). It is designed for learning purposes and safe testing.
+📌 Overview
+
+This is a Python-based port scanner that identifies open ports on your local machine (127.0.0.1).
+
+It includes:
+
+⚡ Multi-threaded scanning for speed
+
+🔍 Basic service detection (smart port mapping)
+
+🛰️ Banner grabbing for identifying services
+
+Built for learning, experimentation, and safe local testing.
 
 🧠 How It Works
+1. Importing Modules
+import socket
+from concurrent.futures import ThreadPoolExecutor
 
-1. Importing the socket module
-    "import socket"
+socket → Handles network communication
 
-- This allows Python to create network connections.
-- Sockets are used to communicate with other devices or       services.
+ThreadPoolExecutor → Enables fast multi-threading
 
-2. Setting the target
-    "target = "127.0.0.1"
+2. Setting the Target
+target = "127.0.0.1"
 
-- 127.0.0.1 means your own computer (localhost).
-- This ensures all scans stay on your machine.
+127.0.0.1 = localhost (your own machine)
 
-3. Creating the function
-    "def port_scan(port):"
+Ensures safe and controlled testing
 
-- This function checks a single port.
-- It takes
-    - port (port number)
+3. Common Port Mapping
+common_ports = {
+    21: "FTP",
+    22: "SSH",
+    80: "HTTP",
+    443: "HTTPS",
+    445: "SMB",
+    135: "RPC",
+    8080: "HTTP-Alt",
+    5501: "Live Server"
+}
 
-4. Using try/except (error handling)
-    "try"
+Helps quickly identify known services
 
-- Prevents the program from crashing if something goes wrong.
+Improves scan readability
 
-    "except Exception as e:"
+4. Banner Grabbing
+def grab_banner(s, port):
 
-- Catches network-related errors.
-- Prints the error instead of stopping the program.
+Attempts to interact with services
 
-5. Creating a socket 
-    "s= socket.socket(socket.AF_INET, socket.SOCK_STREAM)"
+Uses different techniques based on port:
 
-- AF_INET → IPv4
-- SOCK_STREAM → TCP Connection
+HTTP → Sends request
 
-6. Setting a timeout
-    "s.settimeout(1)"
+FTP/SSH → Reads response
 
-- Waits up to 1 seconds per port.
-- Prevents the scan from hanging too long.
+5. Creating the Scanner Function
+def port_scan(port):
 
-7. Connecting to the port
-    "result = s.connect_ex((target, port))"
+Connects to a port
 
-- Attempts a connection to the port.
-- Returns:
-    - 0 → success (port is open)
-    - non-zero → failed (Closed or filtered)
+Detects if it's open
 
-8. Checking if the port is open
-    "if result == 0:"
+Identifies the service
 
-- If true → port is open
-- Otherwise → closed
+6. Socket Creation
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-9. Closing the socket
-    "s.close()"
+AF_INET → IPv4
 
-- Always close connections to free resources.
+SOCK_STREAM → TCP
 
-10. Scanning multiple ports with threading
-    "for port in range(1, 6000):"
+7. Timeout Control
+s.settimeout(1)
 
-- Scans ports 1-6000
+Prevents long delays
 
-    "Thread(target=port_scan, args=(port,))
+Keeps scans fast
 
-- Uses threading for faster scanning
-- Multiple ports are scanned at the same time
+8. Port Connection
+result = s.connect_ex((target, port))
 
-📊 Output Behavor
+0 → Open port
 
-- Only open ports are displayed
-- Progress updates appear during scanning
-- A final message confirms completion
+Non-zero → Closed / filtered
 
-Example Output
+9. Smart Detection Logic
 
-Starting scan...
-[OPEN] Port 135
-[OPEN] Port 445
-[OPEN] Port 5501
-Scan complete.
+Uses:
+
+Port mapping
+
+Banner grabbing
+
+Example output:
+
+[OPEN] Port 22 (SSH - ssh-2.0-openssh...)
+[OPEN] Port 80 (HTTP)
+[OPEN] Port 5501 (Live Server - http)
+10. Multi-threaded Scanning
+with ThreadPoolExecutor(max_workers=100) as executor:
+    executor.map(port_scan, ports)
+
+Scans many ports at the same time
+
+Much faster than single-threaded scanning
+
+💻 Full Code
+import socket
+from concurrent.futures import ThreadPoolExecutor
+
+target = "127.0.0.1"
+
+common_ports = {
+    21: "FTP",
+    22: "SSH",
+    80: "HTTP",
+    443: "HTTPS",
+    445: "SMB",
+    135: "RPC",
+    8080: "HTTP-Alt",
+    5501: "Live Server"
+}
+
+def grab_banner(s, port):
+    try:
+        if port in [80, 8080, 5501]:
+            s.send(b"HEAD / HTTP/1.0\r\n\r\n")
+            banner = s.recv(1024).decode().lower()
+            if "http" in banner:
+                return "HTTP"
+
+        elif port in [21, 22]:
+            banner = s.recv(1024).decode().lower()
+            return banner.strip()
+
+        return "Unknown"
+
+    except:
+        return "Unknown"
+
+
+def port_scan(port):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+
+        result = s.connect_ex((target, port))
+
+        if result == 0:
+            service = common_ports.get(port, "")
+            banner = grab_banner(s, port)
+
+            if banner != "Unknown":
+                print(f"[OPEN] Port {port} ({service} - {banner})")
+            elif service:
+                print(f"[OPEN] Port {port} ({service})")
+            else:
+                print(f"[OPEN] Port {port} (Unknown)")
+
+        s.close()
+
+    except Exception as e:
+        print(f"Error on port {port}: {e}")
+
+
+print("Starting scan...")
+
+ports = range(1, 6000)
+
+with ThreadPoolExecutor(max_workers=100) as executor:
+    executor.map(port_scan, ports)
+
+print("Scan complete.")
+
+📊 Output Behavior
+
+Displays only open ports
+
+Shows:
+
+Port number
+
+Service name
+
+Optional banner info
+
+Fast execution with threading
 
 🔒 Safety Notice
 
-This tool is intened for:
+This tool is intended for:
 
-- Localhost (127.0.0.1)
-- Personal learning environments
+✅ Localhost (127.0.0.1)
 
-⚠️ DO NOT SCAN:
+✅ Personal learning environments
 
-- External servers
-- Networks you dont own
-- Systems without permission
+⚠️ Do NOT scan:
+
+External servers
+
+Networks you don’t own
+
+Systems without permission
 
 🚀 Future Improvements
 
 - Multi-threading (Implemented)
-- ThreadPoolExecutor (Better performance)
-- Banner grabbing (idenify services)
+- ThreadPoolExecutor (Better performance) - Implemented
+- Banner grabbing (idenify services) - Implemented
 - Command-line arguments
 - Scanning different IP addresses
 - Service detection (HTTP, FTP, etc.)
@@ -119,4 +224,5 @@ This project was built as part of learning:
 
 - Networking fundamentals
 - Python socket programming
+- Multi-threading
 - Basic cybersecurity concepts
