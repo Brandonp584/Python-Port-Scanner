@@ -1,5 +1,5 @@
 import socket 
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 target = "127.0.0.1"
 
@@ -24,23 +24,13 @@ def port_scan( port):
     except Exception as e:
         print(f"An error occurred while scanning port {port}: {e}")
 
-threads = []
-
 print("Starting scan...")
 
 # Scan ports from 1 to 6000
-for port in range(1, 6000):
+ports = range(1, 6000)
 
-    # Progress update (every 1000 ports)
-    if port % 1000 == 0:
-        print(f"Scanned up to port {port}...")
+# Limit Threads
+with ThreadPoolExecutor(max_workers=100) as executor:
+    executor.map(port_scan, ports)
 
-    t = Thread(target=port_scan, args=(port,))
-    t.start()
-    threads.append(t)
-
-# Wait for all threads to finish
-for t in threads:
-    t.join()
-
-print(f"Scan Complete.")
+print("Scan completed.")
