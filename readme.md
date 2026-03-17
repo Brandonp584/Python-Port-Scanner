@@ -1,4 +1,7 @@
 🔎 Python Port Scanner (Localhost)
+![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
+![Status](https://img.shields.io/badge/status-active-success)
+![Made With](https://img.shields.io/badge/Made%20with-Python-blue)
 
 This is a simple Python-based port scanner that checks which ports are open on your own machine (127.0.0.1). It is designed for learning purposes and safe testing.
 
