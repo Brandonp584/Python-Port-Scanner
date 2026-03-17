@@ -1,49 +1,50 @@
-🔎 Python Port Scanner (Localhost)
+# 🔎 Python Port Scanner (Localhost)
 ![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Made With](https://img.shields.io/badge/Made%20with-Python-blue)
 
-⚙️ Installation
+## ⚙️ Installation
 
-1. Clone the repository
+### 1. Clone the repository
 - git clone https://github.com/Brandonp584/Python-Port-Scanner.git
 - cd YOUR_REPO_NAME
 
-2. Ensure Python is installed
+### 2. Ensure Python is installed
 This Project requires:
 - Python 3.x
 
 Check your version:
 - python --version
 
-🚀 Quick Start
+## 🚀 Quick Start
+
 Run the scanner with default settings:
 - python scanner.py
 
 Or run a custom scan:
 - python scanner.py --target 127.0.0.1 --start 1 --end 1000
 
-✨ Features
+##✨ Features
 
-- ⚡ Fast Multi-threaded Scanning
+### - ⚡ Fast Multi-threaded Scanning
     Scan thousands of ports quickly using ThreadPoolExecutor
 
-- 🔍 Smart Service Detection
+### - 🔍 Smart Service Detection
     Identifies common services like HTTP, SSH, FTP, SMB, and more
 
--  🛰️ Banner Grabbing
+### -  🛰️ Banner Grabbing
     Attempts to detect running services by analyzing responses
 
--  🎯 Custom Port Scanning (CLI)
+### -  🎯 Custom Port Scanning (CLI)
     Easily define target IP and port ranges from command line
 
--  🖥️ Clean Output
+### -  🖥️ Clean Output
     Displays only ports with readable service information
 
--  🔒 Safe by Design
+### -  🔒 Safe by Design
     Defaults to localhost (127.0.0.1) for secure testing
 
-📌 Overview
+## 📌 Overview
 
 This is a Python-based port scanner that identifies open ports on your local machine (127.0.0.1).
 
@@ -55,13 +56,13 @@ It includes:
 
 Built for learning, experimentation, and safe local testing.
 
-⚡ Command-Line Interface (CLI)
+## ⚡ Command-Line Interface (CLI)
 
 You can now run scans without modifying the code.
 
-🧪 Usage
+### 🧪 Usage
 python scanner.py --target 127.0.0.1 --start 1 --end 1000
-🧩 Options
+### 🧩 Options
 
 --target → Target IP (default: 127.0.0.1)
 
@@ -69,15 +70,16 @@ python scanner.py --target 127.0.0.1 --start 1 --end 1000
 
 --end → End port (default: 6000)
 
-📌 Examples
-# Default scan
+## 📌 Examples
+### Default scan
 python scanner.py
 
-# Custom port range
+### Custom port range
 python scanner.py --target 127.0.0.1 --start 20 --end 100
 
-🧠 How It Works
-1. Importing Modules
+## 🧠 How It Works
+
+### 1. Importing Modules
 import socket
 from concurrent.futures import ThreadPoolExecutor
 
@@ -85,14 +87,14 @@ socket → Handles network communication
 
 ThreadPoolExecutor → Enables fast multi-threading
 
-2. Setting the Target
+### 2. Setting the Target
 target = "127.0.0.1"
 
 127.0.0.1 = localhost (your own machine)
 
 Ensures safe and controlled testing
 
-3. Common Port Mapping
+### 3. Common Port Mapping
 common_ports = {
     21: "FTP",
     22: "SSH",
@@ -108,7 +110,7 @@ Helps quickly identify known services
 
 Improves scan readability
 
-4. Banner Grabbing
+### 4. Banner Grabbing
 def grab_banner(s, port):
 
 Attempts to interact with services
@@ -119,7 +121,7 @@ HTTP → Sends request
 
 FTP/SSH → Reads response
 
-5. Creating the Scanner Function
+### 5. Creating the Scanner Function
 def port_scan(port):
 
 Connects to a port
@@ -128,28 +130,28 @@ Detects if it's open
 
 Identifies the service
 
-6. Socket Creation
+### 6. Socket Creation
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 AF_INET → IPv4
 
 SOCK_STREAM → TCP
 
-7. Timeout Control
+### 7. Timeout Control
 s.settimeout(1)
 
 Prevents long delays
 
 Keeps scans fast
 
-8. Port Connection
+### 8. Port Connection
 result = s.connect_ex((target, port))
 
 0 → Open port
 
 Non-zero → Closed / filtered
 
-9. Smart Detection Logic
+### 9. Smart Detection Logic
 
 Uses:
 
@@ -162,7 +164,8 @@ Example output:
 [OPEN] Port 22 (SSH - ssh-2.0-openssh...)
 [OPEN] Port 80 (HTTP)
 [OPEN] Port 5501 (Live Server - http)
-10. Multi-threaded Scanning
+
+## 10. Multi-threaded Scanning
 with ThreadPoolExecutor(max_workers=100) as executor:
     executor.map(port_scan, ports)
 
@@ -170,7 +173,7 @@ Scans many ports at the same time
 
 Much faster than single-threaded scanning
 
-💻 Full Code
+## 💻 Full Code
 import socket
 from concurrent.futures import ThreadPoolExecutor
 
@@ -238,7 +241,7 @@ with ThreadPoolExecutor(max_workers=100) as executor:
 
 print("Scan complete.")
 
-📊 Output Behavior
+## 📊 Output Behavior
 
 Displays only open ports
 
@@ -252,7 +255,7 @@ Optional banner info
 
 Fast execution with threading
 
-🔒 Safety Notice
+## 🔒 Safety Notice
 
 This tool is intended for:
 
@@ -260,7 +263,7 @@ This tool is intended for:
 
 ✅ Personal learning environments
 
-⚠️ Do NOT scan:
+## ⚠️ Do NOT scan:
 
 External servers
 
@@ -268,7 +271,7 @@ Networks you don’t own
 
 Systems without permission
 
-🚀 Future Improvements
+## 🚀 Future Improvements
 
 - Multi-threading (Implemented)
 - ThreadPoolExecutor (Better performance) - Implemented
@@ -277,7 +280,7 @@ Systems without permission
 - Scanning different IP addresses
 - Service detection (HTTP, FTP, etc.)
 
-📌 Author Notes
+## 📌 Author Notes
 
 This project was built as part of learning:
 
