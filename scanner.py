@@ -1,7 +1,19 @@
 import socket 
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 
-target = "127.0.0.1"
+# Argyment Parser
+parser = argparse.ArgumentParser(description="Python Port Scanner")
+
+parser.add_argument("--target", type=str, default="127.0.0.1", help="Target IP address")
+parser.add_argument("--start", type=int, default=1, help="Start port")
+parser.add_argument("--end", type=int, default=6000, help="End port")
+
+args = parser.parse_args()
+
+target = args.target
+start_port = args.start
+end_port = args.end
 
 # Common ports and their services
 common_ports = {
@@ -15,6 +27,7 @@ common_ports = {
     5501: "Live Server"
 }
 
+# Banner Grabbing
 def grab_banner(s, port):
     try:
         # HTTP Ports
@@ -34,6 +47,7 @@ def grab_banner(s, port):
     except:
         return "Unknown"        
 
+# Port Scanner
 def port_scan( port):
     try:
         # 1. Create a socket object
@@ -64,10 +78,10 @@ def port_scan( port):
     except Exception as e:
         print(f"An error occurred while scanning port {port}: {e}")
 
-print("Starting scan...")
+# Run Scan
+print(f"Starting scan on {target}")
 
-# Scan ports from 1 to 6000
-ports = range(1, 6000)
+ports = range(start_port, end_port)
 
 # Limit Threads
 with ThreadPoolExecutor(max_workers=100) as executor:
