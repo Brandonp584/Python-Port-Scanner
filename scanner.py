@@ -113,12 +113,21 @@ def port_scan( port):
     with progress_lock:
         completed_ports += 1
 
-        # Only Update every 20 ports to reduce flickering
+        # Only Update every 50 ports to reduce flickering
         if completed_ports % 50 != 0 and completed_ports != total_ports:
             return
         
         elapsed_time = time.time() - start_time
         speed = completed_ports / elapsed_time if elapsed_time > 0 else 0
+
+        #ETA Calculation (minutes + seconds)
+        remaining_ports = total_ports - completed_ports
+        eta = remaining_ports / speed if speed > 0 else 0
+
+        eta_seconds = int(eta)
+        minutes = eta_seconds // 60
+        seconds = eta_seconds % 60
+        eta_display = f"{minutes}m {seconds}s"
 
         percent = (completed_ports / total_ports) * 100
         bar_length = 40
@@ -126,7 +135,7 @@ def port_scan( port):
         bar = '█' * filled_length + '-' * (bar_length - filled_length)
         sys.stdout.write(
             f"\r{progress_color}[{bar}] {percent:.1f}% "
-            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec"
+            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec | ETA: {eta_display}"
         )
         sys.stdout.flush()
 
