@@ -1,5 +1,7 @@
 import socket 
 import argparse
+import sys
+from threading import Lock
 from concurrent.futures import ThreadPoolExecutor
 from colorama import Fore, Style, init
 
@@ -34,6 +36,12 @@ common_ports = {
 
 open_ports = []
 
+# Progress Tracking
+progress_lock = Lock()
+total_ports = len(ports)
+completed_ports = 0
+progress_color = Fore.CYAN
+
 # Banner Grabbing
 def grab_banner(s, port):
     try:
@@ -49,13 +57,14 @@ def grab_banner(s, port):
             banner = s.recv(1024).decode().lower()
             return banner.strip()
         
-        return "Unknown"
-    
+        return "Unknown"    
     except:
         return "Unknown"        
 
 # Port Scanner
 def port_scan( port):
+    global completed_ports
+
     try:
         # 1. Create a socket object
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -79,10 +88,11 @@ def port_scan( port):
             else:
                 output = f"[OPEN] Port {port} (Unknown)"
 
-
-            # Print coloured output
-            print(Fore.GREEN + output + Style.RESET_ALL)
-
+            # Print above progress bar
+            with progress_lock:
+                sys.stdout.write("\n")
+                print(Fore.YELLOW + output + Style.RESET_ALL)
+            
             # Optional: Save results to a file
             if args.output:
                 with open(args.output, "a") as f:
@@ -94,17 +104,30 @@ def port_scan( port):
     except Exception as e:
         print(Fore.RED + f"Error scanning port {port}: {e}" + Style.RESET_ALL)
 
+
+    # Update Progress Bar
+    with progress_lock:
+        completed_ports += 1
+        percent = (completed_ports / total_ports) * 100
+        bar_length = 40
+        filled_length = int(bar_length * completed_ports // total_ports)
+        bar = '█' * filled_length + '-' * (bar_length - filled_length)
+        sys.stdout.write(f"\r{progress_color}[{bar}] {percent:.1f}% ({completed_ports}/{total_ports})" + Style.RESET_ALL)
+        sys.stdout.flush()
+        
 # Run Scan
 print(Fore.CYAN + f"Starting scan on {target} with ports {args.start}-{args.end} using {args.threads} threads..." + Style.RESET_ALL)
 
 with ThreadPoolExecutor(max_workers=args.threads) as executor:
     executor.map(port_scan, ports)
 
+print() # Move to the next line after progress bar
+
 print(Fore.CYAN + "\n==== Scan Summary ====" + Style.RESET_ALL)
 
 if open_ports:
-    print(Fore.GREEN + f"Open Ports: {', '.join(map(str, open_ports))}" + Style.RESET_ALL)
-    print(Fore.GREEN + f"Total Open Ports: {len(open_ports)}" + Style.RESET_ALL)
+    print(Fore.MAGENTA + f"Open Ports: {', '.join(map(str, open_ports))}" + Style.RESET_ALL)
+    print(Fore.MAGENTA + f"Total Open Ports: {len(open_ports)}" + Style.RESET_ALL)
 
 else:
     print(Fore.YELLOW + "No open ports found." + Style.RESET_ALL)
