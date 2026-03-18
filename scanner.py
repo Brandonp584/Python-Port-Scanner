@@ -24,7 +24,7 @@ target = args.target
 
 # Mode Logic
 if args.mode == "fast":
-    ports = [p for p in range(args.start, args.end + 1) if 0 <= 1000]
+    ports = [p for p in range(args.start, args.end + 1) if p <= 1000]
     timeout_value = 0.5
 else:
     ports = range(args.start, args.end + 1)
@@ -38,8 +38,14 @@ common_ports = {
     443: "HTTPS",
     445: "SMB",
     135: "RPC",
+    3000: "React / Node",
+    5000: "Flask",
+    5173: "Vite",
+    5432: "PostgreSQL",
+    5501: "Live Server",
+    6379: "Redis",
     8080: "HTTP-Alt",
-    5501: "Live Server"
+    27017: "MongoDB"    
 }
 
 open_ports = []
@@ -97,7 +103,7 @@ def port_scan( port):
             elif service:
                 output = f"[OPEN] Port {port} ({service})"
             else:
-                output = f"[OPEN] Port {port} (Unknown)"
+                output = f"[OPEN] Port {port} (Unknown Service)"
 
             # Print above progress bar
             with progress_lock:
