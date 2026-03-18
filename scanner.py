@@ -9,7 +9,7 @@ from colorama import Fore, Style, init
 # Initialize colorama
 init(autoreset=True)
 
-# Argyment Parser
+# Argument Parser
 parser = argparse.ArgumentParser(description="Python Port Scanner")
 
 parser.add_argument("--target", type=str, default="127.0.0.1", help="Target IP address")
@@ -17,11 +17,18 @@ parser.add_argument("--start", type=int, default=1, help="Start port")
 parser.add_argument("--end", type=int, default=6000, help="End port")
 parser.add_argument("--threads", type=int, default=100, help="Number of concurrent threads")
 parser.add_argument("--output", type=str, help="Optional: save results to a file")
-
+parser.add_argument("--mode", choices=["fast", "full"], default="fast", help="Scan mode")
 args = parser.parse_args()
 
 target = args.target
-ports = range(args.start, args.end + 1)
+
+# Mode Logic
+if args.mode == "fast":
+    ports = [p for p in range(args.start, args.end + 1) if 0 <= 1000]
+    timeout_value = 0.5
+else:
+    ports = range(args.start, args.end + 1)
+    timeout_value = 1
 
 # Common ports and their services
 common_ports = {
@@ -74,7 +81,7 @@ def port_scan( port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # 2. Set a timeout for the connection attempt
-        s.settimeout(1)
+        s.settimeout(timeout_value)
 
         # 3. Attempt to connect
         result = s.connect_ex((target, port))
@@ -99,7 +106,7 @@ def port_scan( port):
             
             # Optional: Save results to a file
             if args.output:
-                with open(args.output, "w") as f:
+                with open(args.output, "a") as f:
                     f.write(f"Scan target: {target}\n")
                     f.write(f"Port range: {args.start}-{args.end}\n\n")
         
@@ -114,7 +121,7 @@ def port_scan( port):
         completed_ports += 1
 
         # Only Update every 50 ports to reduce flickering
-        if completed_ports % 100 != 0 and completed_ports != total_ports:
+        if completed_ports % 50 != 0 and completed_ports != total_ports:
             return
         
         elapsed_time = time.time() - start_time
