@@ -32,6 +32,8 @@ common_ports = {
     5501: "Live Server"
 }
 
+open_ports = []
+
 # Banner Grabbing
 def grab_banner(s, port):
     try:
@@ -66,15 +68,16 @@ def port_scan( port):
 
         # 4. Check the result
         if result == 0:
+            open_ports.append(port)
             service = common_ports.get(port, "")
             banner = grab_banner(s, port)
 
             if banner != "Unknown":
                 output = f"[OPEN] Port  {port} ({service}) - Banner: {banner}"
             elif service:
-                output = f"[OPEN] port {port} ({service})"
+                output = f"[OPEN] Port {port} ({service})"
             else:
-                output = f"[OPEN] port {port} (Unknown)"
+                output = f"[OPEN] Port {port} (Unknown)"
 
 
             # Print coloured output
@@ -97,4 +100,13 @@ print(Fore.CYAN + f"Starting scan on {target} with ports {args.start}-{args.end}
 with ThreadPoolExecutor(max_workers=args.threads) as executor:
     executor.map(port_scan, ports)
 
-print(Fore.CYAN + "Scan Complete." + Style.RESET_ALL)
+print(Fore.CYAN + "\n==== Scan Summary ====" + Style.RESET_ALL)
+
+if open_ports:
+    print(Fore.GREEN + f"Open Ports: {', '.join(map(str, open_ports))}" + Style.RESET_ALL)
+    print(Fore.GREEN + f"Total Open Ports: {len(open_ports)}" + Style.RESET_ALL)
+
+else:
+    print(Fore.YELLOW + "No open ports found." + Style.RESET_ALL)
+
+print(Fore.CYAN + "Scan Completed." + Style.RESET_ALL)
