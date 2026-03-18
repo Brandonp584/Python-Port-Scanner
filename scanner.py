@@ -1,6 +1,7 @@
 import socket 
 import argparse
 import sys
+import time
 from threading import Lock
 from concurrent.futures import ThreadPoolExecutor
 from colorama import Fore, Style, init
@@ -41,6 +42,9 @@ progress_lock = Lock()
 total_ports = len(ports)
 completed_ports = 0
 progress_color = Fore.CYAN
+
+# Scan Speed
+start_time = time.time()
 
 # Banner Grabbing
 def grab_banner(s, port):
@@ -108,13 +112,24 @@ def port_scan( port):
     # Update Progress Bar
     with progress_lock:
         completed_ports += 1
+
+        # Only Update every 20 ports to reduce flickering
+        if completed_ports % 50 != 0 and completed_ports != total_ports:
+            return
+        
+        elapsed_time = time.time() - start_time
+        speed = completed_ports / elapsed_time if elapsed_time > 0 else 0
+
         percent = (completed_ports / total_ports) * 100
         bar_length = 40
         filled_length = int(bar_length * completed_ports // total_ports)
         bar = '█' * filled_length + '-' * (bar_length - filled_length)
-        sys.stdout.write(f"\r{progress_color}[{bar}] {percent:.1f}% ({completed_ports}/{total_ports})" + Style.RESET_ALL)
+        sys.stdout.write(
+            f"\r{progress_color}[{bar}] {percent:.1f}% "
+            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec"
+        )
         sys.stdout.flush()
-        
+
 # Run Scan
 print(Fore.CYAN + f"Starting scan on {target} with ports {args.start}-{args.end} using {args.threads} threads..." + Style.RESET_ALL)
 
