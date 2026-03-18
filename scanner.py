@@ -86,7 +86,7 @@ def port_scan( port):
             banner = grab_banner(s, port)
 
             if banner != "Unknown":
-                output = f"[OPEN] Port  {port} ({service}) - Banner: {banner}"
+                output = f"[OPEN] Port {port} - Service: {banner}"
             elif service:
                 output = f"[OPEN] Port {port} ({service})"
             else:
