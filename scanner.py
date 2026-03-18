@@ -135,7 +135,7 @@ def port_scan( port):
         bar = '█' * filled_length + '-' * (bar_length - filled_length)
         sys.stdout.write(
             f"\r{progress_color}[{bar}] {percent:.1f}% "
-            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec | ETA: {eta_display}"
+            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec | Open: {len(open_ports)} | ETA: {eta_display}"
         )
         sys.stdout.flush()
 
