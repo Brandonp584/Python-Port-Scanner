@@ -77,6 +77,26 @@ Built for learning, experimentation, and safe local testing.
 
 You can now run scans without modifying the code.
 
+## 📸 Example Output
+![Example Image](images/Example-1.jpg)
+
+## 🧠 What I Learned
+Through building this project, I gained hands-on experience with:
+- TCP socket communication and port behavior
+- Multi-threading and performance optimization
+- Handling race conditions using locks
+- Real-time progress tracking and ETA calculations
+- Writing clean, user-friendly CLI tools
+- Basic service fingerprinting and banner grabbing
+
+This project helped bridge the gap between theory and real-world cybersecurity tools.
+
+## ⚙️ Performance Notes
+- Uses ThreadPoolExecutor for high-speed concurrent scanning
+- Optimized progress updates (updates every 50 ports to reduce flickering)
+- Adjustable thread count for balacing speed vs system load
+- Fast mode reduces timeout for quicker scans on common ports
+
 ### 🧪 Usage
 ```bash
 python scanner.py --target 127.0.0.1 --start 1 --end 1000 --threads 100 --output results.txt 
