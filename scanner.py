@@ -99,8 +99,9 @@ def port_scan( port):
             
             # Optional: Save results to a file
             if args.output:
-                with open(args.output, "a") as f:
-                    f.write(output + "\n")
+                with open(args.output, "w") as f:
+                    f.write(f"Scan target: {target}\n")
+                    f.write(f"Port range: {args.start}-{args.end}\n\n")
         
         # 5. Close the connection
         s.close()
@@ -114,7 +115,7 @@ def port_scan( port):
         completed_ports += 1
 
         # Only Update every 50 ports to reduce flickering
-        if completed_ports % 50 != 0 and completed_ports != total_ports:
+        if completed_ports % 100 != 0 and completed_ports != total_ports:
             return
         
         elapsed_time = time.time() - start_time
