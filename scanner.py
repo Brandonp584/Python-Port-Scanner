@@ -150,8 +150,9 @@ print() # Move to the next line after progress bar
 print(Fore.CYAN + "\n==== Scan Summary ====" + Style.RESET_ALL)
 
 if open_ports:
-    print(Fore.MAGENTA + f"Open Ports: {', '.join(map(str, open_ports))}" + Style.RESET_ALL)
-    print(Fore.MAGENTA + f"Total Open Ports: {len(open_ports)}" + Style.RESET_ALL)
+    sorted_ports = sorted(open_ports)
+    print(Fore.MAGENTA + f"Open Ports: {', '.join(map(str, sorted_ports))}" + Style.RESET_ALL)
+    print(Fore.MAGENTA + f"Total Open Ports: {len(sorted_ports)}" + Style.RESET_ALL)
 
 else:
     print(Fore.YELLOW + "No open ports found." + Style.RESET_ALL)
