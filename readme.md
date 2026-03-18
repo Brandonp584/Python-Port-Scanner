@@ -1,6 +1,6 @@
 # 🔎 Python Port Scanner (Localhost)
 ![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
-![Status](https://img.shields.io/badge/status-active-success)
+![Status](https://img.shields.io/badge/status-Ready-blue)
 ![Made With](https://img.shields.io/badge/Made%20with-Python-blue)
 
 ## ⚙️ Installation
@@ -77,10 +77,10 @@ Built for learning, experimentation, and safe local testing.
 
 You can now run scans without modifying the code.
 
-## 📸 Example Output
+### 📸 Example Output
 ![Example Image](images/Example-1.jpg)
 
-## 🧠 What I Learned
+### 🧠 What I Learned
 Through building this project, I gained hands-on experience with:
 - TCP socket communication and port behavior
 - Multi-threading and performance optimization
@@ -91,11 +91,24 @@ Through building this project, I gained hands-on experience with:
 
 This project helped bridge the gap between theory and real-world cybersecurity tools.
 
-## ⚙️ Performance Notes
+### ⚙️ Performance Notes
 - Uses ThreadPoolExecutor for high-speed concurrent scanning
 - Optimized progress updates (updates every 50 ports to reduce flickering)
 - Adjustable thread count for balacing speed vs system load
 - Fast mode reduces timeout for quicker scans on common ports
+
+### 📁 Project Structure
+```bash
+Python-Port-Scanner/
+|- scanner.py # Main scanning script
+|- README.md  # Project documentation
+```
+
+### ⚠️ Known Limitations
+- Only support TCP scanning (no UDP scanning)
+- Limited service detection based on common ports and banners
+- No OS fingerprinting
+- Banner grabbing may not work on all services
 
 ### 🧪 Usage
 ```bash
@@ -151,8 +164,14 @@ common_ports = {
     443: "HTTPS",
     445: "SMB",
     135: "RPC",
+    3000: "React / Node",
+    5000: "Flask",
+    5173: "Vite",
+    5432: "PostgreSQL",
+    5501: "Live Server",
+    6379: "Redis",
     8080: "HTTP-Alt",
-    5501: "Live Server"
+    27017: "MongoDB"    
 }
 ```
 - Helps quickly identify known services
@@ -164,8 +183,8 @@ def grab_banner(s, port):
 ```
 - Attempts to interact with services
 - Uses different techniques based on port:
-- HTTP → Sends request
-- FTP/SSH → Reads response
+    - HTTP → Sends request
+    - FTP/SSH → Reads response
 
 ### 5. Creating the Scanner Function
 ```python
@@ -200,12 +219,7 @@ result = s.connect_ex((target, port))
 - Uses:
 - Port mapping
 - Banner grabbing
-- Example output:
-```bash
-[OPEN] Port 22 (SSH - ssh-2.0-openssh...)
-[OPEN] Port 80 (HTTP)
-[OPEN] Port 5501 (Live Server - http)
-```
+
 ## 10. Multi-threaded Scanning
 ```python
 with ThreadPoolExecutor(max_workers=100) as executor:
@@ -218,13 +232,16 @@ with ThreadPoolExecutor(max_workers=100) as executor:
 ```python
 import socket 
 import argparse
+import sys
+import time
+from threading import Lock
 from concurrent.futures import ThreadPoolExecutor
 from colorama import Fore, Style, init
 
 # Initialize colorama
 init(autoreset=True)
 
-# Argyment Parser
+# Argument Parser
 parser = argparse.ArgumentParser(description="Python Port Scanner")
 
 parser.add_argument("--target", type=str, default="127.0.0.1", help="Target IP address")
@@ -232,11 +249,18 @@ parser.add_argument("--start", type=int, default=1, help="Start port")
 parser.add_argument("--end", type=int, default=6000, help="End port")
 parser.add_argument("--threads", type=int, default=100, help="Number of concurrent threads")
 parser.add_argument("--output", type=str, help="Optional: save results to a file")
-
+parser.add_argument("--mode", choices=["fast", "full"], default="fast", help="Scan mode")
 args = parser.parse_args()
 
 target = args.target
-ports = range(args.start, args.end + 1)
+
+# Mode Logic
+if args.mode == "fast":
+    ports = [p for p in range(args.start, args.end + 1) if p <= 1000]
+    timeout_value = 0.5
+else:
+    ports = range(args.start, args.end + 1)
+    timeout_value = 1
 
 # Common ports and their services
 common_ports = {
@@ -246,9 +270,26 @@ common_ports = {
     443: "HTTPS",
     445: "SMB",
     135: "RPC",
+    3000: "React / Node",
+    5000: "Flask",
+    5173: "Vite",
+    5432: "PostgreSQL",
+    5501: "Live Server",
+    6379: "Redis",
     8080: "HTTP-Alt",
-    5501: "Live Server"
+    27017: "MongoDB"    
 }
+
+open_ports = []
+
+# Progress Tracking
+progress_lock = Lock()
+total_ports = len(ports)
+completed_ports = 0
+progress_color = Fore.CYAN
+
+# Scan Speed
+start_time = time.time()
 
 # Banner Grabbing
 def grab_banner(s, port):
@@ -265,49 +306,83 @@ def grab_banner(s, port):
             banner = s.recv(1024).decode().lower()
             return banner.strip()
         
-        return "Unknown"
-    
+        return "Unknown"    
     except:
         return "Unknown"        
 
 # Port Scanner
 def port_scan( port):
+    global completed_ports
+
     try:
         # 1. Create a socket object
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # 2. Set a timeout for the connection attempt
-        s.settimeout(1)
+        s.settimeout(timeout_value)
 
         # 3. Attempt to connect
         result = s.connect_ex((target, port))
 
         # 4. Check the result
         if result == 0:
+            open_ports.append(port)
             service = common_ports.get(port, "")
             banner = grab_banner(s, port)
 
             if banner != "Unknown":
-                output = f"[OPEN] Port  {port} ({service}) - Banner: {banner}"
+                output = f"[OPEN] Port {port} - Service: {banner}"
             elif service:
                 output = f"[OPEN] Port {port} ({service})"
             else:
-                output = f"[OPEN] Port {port} (Unknown)"
+                output = f"[OPEN] Port {port} (Unknown Service)"
 
-
-            # Print coloured output
-            print(Fore.GREEN + output + Style.RESET_ALL)
-
+            # Print above progress bar
+            with progress_lock:
+                sys.stdout.write("\n")
+                print(Fore.YELLOW + output + Style.RESET_ALL)
+            
             # Optional: Save results to a file
             if args.output:
                 with open(args.output, "a") as f:
-                    f.write(output + "\n")
+                    f.write(f"Scan target: {target}\n")
+                    f.write(f"Port range: {args.start}-{args.end}\n\n")
         
         # 5. Close the connection
         s.close()
 
-    except Exception as e:
-        print(Fore.RED + f"Error scanning port {port}: {e}" + Style.RESET_ALL)
+    except:
+        pass
+
+    # Update Progress Bar
+    with progress_lock:
+        completed_ports += 1
+
+        # Only Update every 50 ports to reduce flickering
+        if completed_ports % 50 != 0 and completed_ports != total_ports:
+            return
+        
+        elapsed_time = time.time() - start_time
+        speed = completed_ports / elapsed_time if elapsed_time > 0 else 0
+
+        #ETA Calculation (minutes + seconds)
+        remaining_ports = total_ports - completed_ports
+        eta = remaining_ports / speed if speed > 0 else 0
+
+        eta_seconds = int(eta)
+        minutes = eta_seconds // 60
+        seconds = eta_seconds % 60
+        eta_display = f"{minutes}m {seconds}s"
+
+        percent = (completed_ports / total_ports) * 100
+        bar_length = 40
+        filled_length = int(bar_length * completed_ports // total_ports)
+        bar = '█' * filled_length + '-' * (bar_length - filled_length)
+        sys.stdout.write(
+            f"\r{progress_color}[{bar}] {percent:.1f}% "
+            f"({completed_ports}/{total_ports}) | {speed:.1f} ports/sec | Open: {len(open_ports)} | ETA: {eta_display}"
+        )
+        sys.stdout.flush()
 
 # Run Scan
 print(Fore.CYAN + f"Starting scan on {target} with ports {args.start}-{args.end} using {args.threads} threads..." + Style.RESET_ALL)
@@ -315,7 +390,19 @@ print(Fore.CYAN + f"Starting scan on {target} with ports {args.start}-{args.end}
 with ThreadPoolExecutor(max_workers=args.threads) as executor:
     executor.map(port_scan, ports)
 
-print(Fore.CYAN + "Scan Complete." + Style.RESET_ALL)
+print() # Move to the next line after progress bar
+
+print(Fore.CYAN + "\n==== Scan Summary ====" + Style.RESET_ALL)
+
+if open_ports:
+    sorted_ports = sorted(open_ports)
+    print(Fore.MAGENTA + f"Open Ports: {', '.join(map(str, sorted_ports))}" + Style.RESET_ALL)
+    print(Fore.MAGENTA + f"Total Open Ports: {len(sorted_ports)}" + Style.RESET_ALL)
+
+else:
+    print(Fore.YELLOW + "No open ports found." + Style.RESET_ALL)
+
+print(Fore.CYAN + "Scan Completed." + Style.RESET_ALL)
 ```
 
 ## 📊 Output Behavior
@@ -343,12 +430,21 @@ Use only on:
 - Command-line arguments - Implemented
 - Scanning different IP addresses - Implemented
 - Service detection (HTTP, FTP, etc.) - Implemented
+- Advanced service fingerprinting (Nmap-style detection)
+- Support for scanning IP ranges / CIDR blocks
+- Export results to JSON/CSV for analysis
+- Add stealth scanning techniques (SYN scan simulation)
+- Smarter banner parsing and protocol detection
+- Adaptive timeout based on network conditions
 
 ## 📌 Author Notes
-
 This project was built as part of learning:
-
 - Networking fundamentals
 - Python socket programming
 - Multi-threading
 - Basic cybersecurity concepts
+
+## 👨‍💻 Author
+### Brandon
+- Aspiring Cybersecurity Student
+- Focused on networking, decurity tools, and ethical hacking fundamentals.
