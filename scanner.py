@@ -106,9 +106,8 @@ def port_scan( port):
         # 5. Close the connection
         s.close()
 
-    except Exception as e:
-        print(Fore.RED + f"Error scanning port {port}: {e}" + Style.RESET_ALL)
-
+    except:
+        pass
 
     # Update Progress Bar
     with progress_lock:
